@@ -8,6 +8,7 @@ const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
 const multiply = (a, b) => a * b;
 const divide = (a, b) => a / b;
+const convertToPercent = num => num / 100;
 const operate = function (operator, firstNum, secondNum) {
   switch (operator) {
     case '+':
