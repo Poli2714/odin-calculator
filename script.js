@@ -2,6 +2,7 @@
 
 const calculator = document.querySelector('.calculator');
 const result = document.querySelector('.result');
+const clearBtn = document.querySelector('.clear');
 
 let firstNumber = 0;
 let secondNumber = 2;
@@ -30,7 +31,7 @@ const operate = function (operator, firstNum, secondNum) {
 
 const displayNumbers = function (textNum) {};
 
-let displayNum = '';
+let display = '';
 const calcObj = {};
 
 calculator.addEventListener('click', function (e) {
@@ -39,19 +40,21 @@ calculator.addEventListener('click', function (e) {
 
   if (target.classList.contains('number')) {
     if (result.textContent === '0' && target.textContent === '0') return;
-    displayNum += target.textContent;
-    result.textContent = displayNum;
+    display += target.textContent;
+    result.textContent = display;
+    clearBtn.textContent = 'C';
   }
 
   if (target.classList.contains('clear')) {
     result.textContent = '0';
-    displayNum = [];
+    clearBtn.textContent = 'AC';
+    display = [];
   }
 
   if (target.classList.contains('operator')) {
     firstNumber = +result.textContent;
     operator = target.textContent;
-    displayNum = '';
+    display = '';
   }
 
   if (target.classList.contains('equal')) {
