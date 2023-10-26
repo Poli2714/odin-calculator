@@ -4,10 +4,9 @@ const calculator = document.querySelector('.calculator');
 const result = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
 
-let firstNumber = 0;
-let secondNumber = 2;
-let operator = '+';
-let firstNumDefined = false;
+let firstNumber = '';
+let secondNumber = '';
+let operator = '';
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -20,19 +19,16 @@ const operate = function (operator, firstNum, secondNum) {
       return add(firstNum, secondNum);
     case '-':
       return subtract(firstNum, secondNum);
-    case '*':
+    case 'x':
       return multiply(firstNum, secondNum);
-    case '/':
+    case '÷':
       return divide(firstNum, secondNum);
     default:
       return 'Please use a valid operator';
   }
 };
 
-const displayNumbers = function (textNum) {};
-
 let display = '';
-const calcObj = {};
 
 calculator.addEventListener('click', function (e) {
   const target = e.target;
@@ -48,17 +44,26 @@ calculator.addEventListener('click', function (e) {
   if (target.classList.contains('clear')) {
     result.textContent = '0';
     clearBtn.textContent = 'AC';
-    display = [];
+    display = '';
+    firstNumber = secondNumber = operator = '';
   }
 
   if (target.classList.contains('operator')) {
-    firstNumber = +result.textContent;
-    operator = target.textContent;
     display = '';
+    if (firstNumber === '') {
+      firstNumber = +result.textContent;
+    } else {
+      secondNumber = +result.textContent;
+      result.textContent = operate(operator, firstNumber, secondNumber);
+      firstNumber = +result.textContent;
+    }
+    operator = target.textContent;
   }
 
   if (target.classList.contains('equal')) {
     secondNumber = +result.textContent;
     result.textContent = operate(operator, firstNumber, secondNumber);
+    display = '';
+    firstNumber = secondNumber = operator = '';
   }
 });
