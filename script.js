@@ -74,4 +74,8 @@ calculator.addEventListener('click', function (e) {
     display = '';
     firstOperand = secondOperand = operator = '';
   }
+
+  if (target.classList.contains('percent')) {
+    result.textContent = convertToPercent(+result.textContent);
+  }
 });
