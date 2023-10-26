@@ -4,8 +4,8 @@ const calculator = document.querySelector('.calculator');
 const result = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
 
-let firstNumber = '';
-let secondNumber = '';
+let firstOperand = '';
+let secondOperand = '';
 let operator = '';
 
 const add = (a, b) => a + b;
@@ -13,16 +13,16 @@ const subtract = (a, b) => a - b;
 const multiply = (a, b) => a * b;
 const divide = (a, b) => a / b;
 const convertToPercent = num => num / 100;
-const operate = function (operator, firstNum, secondNum) {
+const operate = function (operator, firstOperand, secondOperand) {
   switch (operator) {
     case '+':
-      return add(firstNum, secondNum);
+      return add(firstOperand, secondOperand);
     case '-':
-      return subtract(firstNum, secondNum);
+      return subtract(firstOperand, secondOperand);
     case 'x':
-      return multiply(firstNum, secondNum);
+      return multiply(firstOperand, secondOperand);
     case '÷':
-      return divide(firstNum, secondNum);
+      return divide(firstOperand, secondOperand);
     default:
       return 'Please use a valid operator';
   }
@@ -45,33 +45,33 @@ calculator.addEventListener('click', function (e) {
     result.textContent = '0';
     clearBtn.textContent = 'AC';
     display = '';
-    firstNumber = secondNumber = operator = '';
+    firstOperand = secondOperand = operator = '';
   }
 
   if (target.classList.contains('operator')) {
     display = '';
-    if (firstNumber === '') {
-      firstNumber = +result.textContent;
+    if (firstOperand === '') {
+      firstOperand = +result.textContent;
     } else {
-      secondNumber = +result.textContent;
-      if (secondNumber === 0 && operator === '÷') {
+      secondOperand = +result.textContent;
+      if (secondOperand === 0 && operator === '÷') {
         result.textContent = 'ERROR';
         return;
       }
-      result.textContent = operate(operator, firstNumber, secondNumber);
-      firstNumber = +result.textContent;
+      result.textContent = operate(operator, firstOperand, secondOperand);
+      firstOperand = +result.textContent;
     }
     operator = target.textContent;
   }
 
   if (target.classList.contains('equal')) {
-    secondNumber = +result.textContent;
-    if (secondNumber === 0 && operator === '÷') {
+    secondOperand = +result.textContent;
+    if (secondOperand === 0 && operator === '÷') {
       result.textContent = 'ERROR';
       return;
     }
-    result.textContent = operate(operator, firstNumber, secondNumber);
+    result.textContent = operate(operator, firstOperand, secondOperand);
     display = '';
-    firstNumber = secondNumber = operator = '';
+    firstOperand = secondOperand = operator = '';
   }
 });
