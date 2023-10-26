@@ -54,6 +54,10 @@ calculator.addEventListener('click', function (e) {
       firstNumber = +result.textContent;
     } else {
       secondNumber = +result.textContent;
+      if (secondNumber === 0 && operator === '÷') {
+        result.textContent = 'ERROR';
+        return;
+      }
       result.textContent = operate(operator, firstNumber, secondNumber);
       firstNumber = +result.textContent;
     }
@@ -62,6 +66,10 @@ calculator.addEventListener('click', function (e) {
 
   if (target.classList.contains('equal')) {
     secondNumber = +result.textContent;
+    if (secondNumber === 0 && operator === '÷') {
+      result.textContent = 'ERROR';
+      return;
+    }
     result.textContent = operate(operator, firstNumber, secondNumber);
     display = '';
     firstNumber = secondNumber = operator = '';
