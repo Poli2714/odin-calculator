@@ -26,6 +26,7 @@ body {
 .calculator {
   background-color: #432818;
   border-radius: 15px;
+  box-shadow: 25px 25px 50px 0px rgba(67, 40, 24, 0.6);
 
   display: flex;
   flex-direction: column;
