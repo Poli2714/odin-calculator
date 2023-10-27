@@ -39,6 +39,7 @@ calculator.addEventListener('click', function (e) {
     if (result.textContent === '0' && target.textContent === '0') return;
     display += target.textContent;
     result.textContent = display;
+    operatorBtns.forEach(operator => operator.classList.remove('active'));
     clearBtn.textContent = 'C';
   }
 
@@ -47,6 +48,7 @@ calculator.addEventListener('click', function (e) {
     clearBtn.textContent = 'AC';
     display = '';
     firstOperand = secondOperand = operator = '';
+    operatorBtns.forEach(operator => operator.classList.remove('active'));
   }
 
   if (target.classList.contains('operator')) {
@@ -63,6 +65,7 @@ calculator.addEventListener('click', function (e) {
       firstOperand = +result.textContent;
     }
     operator = target.textContent;
+    target.classList.add('active');
   }
 
   if (target.classList.contains('equal')) {

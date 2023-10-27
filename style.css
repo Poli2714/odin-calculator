@@ -84,5 +84,6 @@ body {
 }
 
 .active {
-  background-color: hsl(19, 100%, 85%);
+  /* background-color: hsl(19, 100%, 85%); */
+  background-color: hsla(17, 91%, 65%, 0.5);
 }
