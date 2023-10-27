@@ -1,13 +1,14 @@
 'use strict';
 
 const calculator = document.querySelector('.calculator');
-const result = document.querySelector('.result');
+const display = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
 const operatorBtns = document.querySelectorAll('.operator');
 
 let firstOperand = '';
 let secondOperand = '';
 let operator = '';
+let storedData = '';
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -15,71 +16,80 @@ const multiply = (a, b) => a * b;
 const divide = (a, b) => a / b;
 const convertToPercent = num => num / 100;
 const operate = function (operator, firstOperand, secondOperand) {
+  const numberFormat = new Intl.NumberFormat('en-us');
   switch (operator) {
     case '+':
-      return add(firstOperand, secondOperand);
+      return numberFormat.format(add(firstOperand, secondOperand));
     case '-':
-      return subtract(firstOperand, secondOperand);
+      return numberFormat.format(subtract(firstOperand, secondOperand));
     case 'x':
-      return multiply(firstOperand, secondOperand);
+      return numberFormat.format(multiply(firstOperand, secondOperand));
     case '÷':
-      return divide(firstOperand, secondOperand);
+      return numberFormat.format(divide(firstOperand, secondOperand));
     default:
       return 'Please use a valid operator';
   }
 };
-
-let display = '';
+const formatToNumber = function (string) {
+  return +string
+    .split('')
+    .filter(char => char !== ',')
+    .join('');
+};
 
 calculator.addEventListener('click', function (e) {
   const target = e.target;
   if (!target.classList.contains('btn')) return;
 
   if (target.classList.contains('number')) {
-    if (result.textContent === '0' && target.textContent === '0') return;
-    display += target.textContent;
-    result.textContent = display;
+    // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
+    let userNumber = target.textContent;
+
+    if (display.textContent === '0' && userNumber === '0') return;
+    storedData += userNumber;
+    display.textContent = new Intl.NumberFormat().format(storedData);
     operatorBtns.forEach(operator => operator.classList.remove('active'));
     clearBtn.textContent = 'C';
   }
 
+  // Add floating point to numbers when press '.'
+
   if (target.classList.contains('clear')) {
-    result.textContent = '0';
+    display.textContent = '0';
     clearBtn.textContent = 'AC';
-    display = '';
-    firstOperand = secondOperand = operator = '';
+    firstOperand = secondOperand = operator = storedData = '';
     operatorBtns.forEach(operator => operator.classList.remove('active'));
   }
 
   if (target.classList.contains('operator')) {
-    display = '';
+    // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
+    storedData = '';
     if (firstOperand === '') {
-      firstOperand = +result.textContent;
+      firstOperand = formatToNumber(display.textContent);
     } else {
-      secondOperand = +result.textContent;
+      secondOperand = formatToNumber(display.textContent);
       if (secondOperand === 0 && operator === '÷') {
-        result.textContent = 'ERROR';
+        display.textContent = 'ERROR';
         return;
       }
-      result.textContent = operate(operator, firstOperand, secondOperand);
-      firstOperand = +result.textContent;
+      display.textContent = operate(operator, firstOperand, secondOperand);
+      firstOperand = formatToNumber(display.textContent);
     }
     operator = target.textContent;
     target.classList.add('active');
   }
 
   if (target.classList.contains('equal')) {
-    secondOperand = +result.textContent;
+    secondOperand = formatToNumber(display.textContent);
     if (secondOperand === 0 && operator === '÷') {
-      result.textContent = 'ERROR';
+      display.textContent = 'ERROR';
       return;
     }
-    result.textContent = operate(operator, firstOperand, secondOperand);
-    display = '';
-    firstOperand = secondOperand = operator = '';
+    display.textContent = operate(operator, firstOperand, secondOperand);
+    firstOperand = secondOperand = operator = storedData = '';
   }
 
   if (target.classList.contains('percent')) {
-    result.textContent = convertToPercent(+result.textContent);
+    display.textContent = convertToPercent(+display.textContent);
   }
 });
