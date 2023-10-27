@@ -5,11 +5,7 @@
 }
 
 body {
-  background: linear-gradient(
-    90deg,
-    hsla(29, 92%, 70%, 1) 0%,
-    hsla(0, 87%, 73%, 1) 100%
-  );
+  background-color: hsl(82, 18%, 51%);
 
   color: white;
 
@@ -18,15 +14,15 @@ body {
   justify-content: center;
 
   font-family: 'Dosis', sans-serif;
-  font-size: 40px;
+  font-size: 30px;
   font-weight: 600;
   height: 100vh;
 }
 
 .calculator {
-  background-color: #432818;
+  background-color: #d8f3dc;
   border-radius: 15px;
-  box-shadow: 25px 25px 50px 0px rgba(67, 40, 24, 0.6);
+  box-shadow: 25px 25px 50px 0px hsla(22, 47%, 18%, 0.6);
 
   display: flex;
   flex-direction: column;
@@ -37,9 +33,9 @@ body {
 }
 
 .display {
-  background-color: #edf6f9;
+  background-color: hsl(159, 100%, 97%);
   border-radius: 10px;
-  color: #432818;
+  color: #007f5f;
 
   display: flex;
   align-items: center;
@@ -68,18 +64,25 @@ body {
 
 .btn {
   color: inherit;
-  /* background-color: #1d3557; */
-  background-color: #1a759f;
+  background-color: hsl(165, 100%, 25%);
   border: none;
   border-radius: 10px;
   font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
-  height: 100px;
-  width: 110px;
+  height: 80px;
+  width: 90px;
+}
+
+.special {
+  background-color: hsl(77, 50%, 53%);
 }
 
 .operator,
 .equal {
-  background-color: #e76f51;
+  background-color: hsl(17, 91%, 65%);
+}
+
+.active {
+  background-color: hsl(19, 100%, 85%);
 }

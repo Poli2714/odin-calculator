@@ -3,6 +3,7 @@
 const calculator = document.querySelector('.calculator');
 const result = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
+const operatorBtns = document.querySelectorAll('.operator');
 
 let firstOperand = '';
 let secondOperand = '';
