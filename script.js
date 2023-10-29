@@ -30,6 +30,7 @@ const operate = function (operator, firstOperand, secondOperand) {
       return 'Please use a valid operator';
   }
 };
+const isFloat = n => Number(n) % 1 !== 0;
 const formatToNumber = function (string) {
   return +string
     .split('')
@@ -54,6 +55,11 @@ calculator.addEventListener('click', function (e) {
     display.textContent = storedData;
   }
 
+  if (target.classList.contains('percent')) {
+    display.textContent = convertToPercent(+display.textContent);
+    storedData = '';
+  }
+
   if (target.classList.contains('number')) {
     let userNumber = target.textContent;
     if (
@@ -63,12 +69,22 @@ calculator.addEventListener('click', function (e) {
       return;
     if (display.textContent === '-0') storedData = '-';
     storedData += userNumber;
-    display.textContent = new Intl.NumberFormat().format(storedData);
+    console.log(storedData);
+    // FIX THE FORMAT
+    display.textContent = new Intl.NumberFormat('en-us', {
+      maximumFractionDigits: 6,
+    }).format(storedData);
     operatorBtns.forEach(operator => operator.classList.remove('active'));
     clearBtn.textContent = 'C';
   }
 
-  // Add floating point to numbers when press '.'
+  if (target.classList.contains('period')) {
+    const displayNumber = display.textContent;
+    if (isFloat(displayNumber)) return;
+    storedData = displayNumber === '0' ? '0.' : `${storedData}.`;
+    display.textContent = storedData;
+    clearBtn.textContent = 'C';
+  }
 
   if (target.classList.contains('operator')) {
     // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
@@ -96,10 +112,5 @@ calculator.addEventListener('click', function (e) {
     }
     display.textContent = operate(operator, firstOperand, secondOperand);
     firstOperand = secondOperand = operator = storedData = '';
-  }
-
-  if (target.classList.contains('percent')) {
-    display.textContent = convertToPercent(+display.textContent);
-    storedData = '';
   }
 });
