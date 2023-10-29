@@ -74,7 +74,9 @@ body {
   width: 90px;
 }
 
-.special {
+.clear,
+.plus-minus,
+.percent {
   background-color: hsl(77, 50%, 53%);
 }
 

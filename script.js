@@ -41,11 +41,27 @@ calculator.addEventListener('click', function (e) {
   const target = e.target;
   if (!target.classList.contains('btn')) return;
 
-  if (target.classList.contains('number')) {
-    // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
-    let userNumber = target.textContent;
+  if (target.classList.contains('clear')) {
+    display.textContent = '0';
+    clearBtn.textContent = 'AC';
+    firstOperand = secondOperand = operator = storedData = '';
+    operatorBtns.forEach(operator => operator.classList.remove('active'));
+  }
 
-    if (display.textContent === '0' && userNumber === '0') return;
+  if (target.classList.contains('plus-minus')) {
+    storedData =
+      display.textContent === '0' ? '-0' : 0 - Number(display.textContent);
+    display.textContent = storedData;
+  }
+
+  if (target.classList.contains('number')) {
+    let userNumber = target.textContent;
+    if (
+      (display.textContent === '0' || display.textContent === '-0') &&
+      userNumber === '0'
+    )
+      return;
+    if (display.textContent === '-0') storedData = '-';
     storedData += userNumber;
     display.textContent = new Intl.NumberFormat().format(storedData);
     operatorBtns.forEach(operator => operator.classList.remove('active'));
@@ -53,13 +69,6 @@ calculator.addEventListener('click', function (e) {
   }
 
   // Add floating point to numbers when press '.'
-
-  if (target.classList.contains('clear')) {
-    display.textContent = '0';
-    clearBtn.textContent = 'AC';
-    firstOperand = secondOperand = operator = storedData = '';
-    operatorBtns.forEach(operator => operator.classList.remove('active'));
-  }
 
   if (target.classList.contains('operator')) {
     // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
@@ -91,5 +100,6 @@ calculator.addEventListener('click', function (e) {
 
   if (target.classList.contains('percent')) {
     display.textContent = convertToPercent(+display.textContent);
+    storedData = '';
   }
 });
