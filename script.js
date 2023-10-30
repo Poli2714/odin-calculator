@@ -1,14 +1,16 @@
 'use strict';
 
 const calculator = document.querySelector('.calculator');
+const history = document.querySelector('.history');
 const display = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
 const operatorBtns = document.querySelectorAll('.operator');
 
 let firstOperand = '';
 let secondOperand = '';
-let operator = '';
-let storedData = '';
+let currentOperator = '';
+// let storedData = '';
+let operationsHistory = [];
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -32,11 +34,25 @@ const operate = function (operator, firstOperand, secondOperand) {
 };
 const isFloat = n => Number(n) % 1 !== 0;
 const formatToNumber = function (string) {
-  return +string
+  return string
     .split('')
     .filter(char => char !== ',')
     .join('');
 };
+
+const renderNumbers = function (displayedNumber, pressedNumber) {
+  if (displayedNumber === '0' && pressedNumber === '0') return '0';
+  if (displayedNumber === '-0' && pressedNumber === '0') return '-0';
+  if (displayedNumber === '0') return pressedNumber;
+  if (displayedNumber === '-0') return `${0 - pressedNumber}`;
+  return new Intl.NumberFormat('en-us').format(displayedNumber + pressedNumber);
+};
+
+const displayHistory = function (history, displayedNumber, operator) {
+  history.push(displayedNumber, operator);
+  return history.join(' ');
+};
+const clearDisplay = function (display) {};
 
 calculator.addEventListener('click', function (e) {
   const target = e.target;
@@ -44,37 +60,33 @@ calculator.addEventListener('click', function (e) {
 
   if (target.classList.contains('clear')) {
     display.textContent = '0';
+    history.textContent = '';
     clearBtn.textContent = 'AC';
-    firstOperand = secondOperand = operator = storedData = '';
+    firstOperand = secondOperand = currentOperator = storedData = '';
     operatorBtns.forEach(operator => operator.classList.remove('active'));
   }
 
   if (target.classList.contains('plus-minus')) {
-    storedData =
-      display.textContent === '0' ? '-0' : 0 - Number(display.textContent);
+    const displayedNumber = Number(display.textContent);
+    storedData = !displayedNumber ? '-0' : 0 - displayedNumber;
     display.textContent = storedData;
   }
 
   if (target.classList.contains('percent')) {
-    display.textContent = convertToPercent(+display.textContent);
+    const displayedNumber = Number(display.textContent);
+    display.textContent = convertToPercent(displayedNumber);
     storedData = '';
   }
 
   if (target.classList.contains('number')) {
     let userNumber = target.textContent;
-    if (
-      (display.textContent === '0' || display.textContent === '-0') &&
-      userNumber === '0'
-    )
-      return;
-    if (display.textContent === '-0') storedData = '-';
-    storedData += userNumber;
-    console.log(storedData);
-    // FIX THE FORMAT
-    display.textContent = new Intl.NumberFormat('en-us', {
-      maximumFractionDigits: 6,
-    }).format(storedData);
-    operatorBtns.forEach(operator => operator.classList.remove('active'));
+    let displayedNumber = formatToNumber(display.textContent);
+    if (currentOperator) {
+      operatorBtns.forEach(operator => operator.classList.remove('active'));
+      displayedNumber = '0';
+      currentOperator = '';
+    }
+    display.textContent = renderNumbers(displayedNumber, userNumber);
     clearBtn.textContent = 'C';
   }
 
@@ -87,30 +99,48 @@ calculator.addEventListener('click', function (e) {
   }
 
   if (target.classList.contains('operator')) {
-    // Check if display.textcontent is of numeric value. It can display ERROR. Will not it later
-    storedData = '';
-    if (firstOperand === '') {
-      firstOperand = formatToNumber(display.textContent);
+    let displayedNumber = display.textContent;
+    if (currentOperator) {
+      operatorBtns.forEach(operator => operator.classList.remove('active'));
+      currentOperator = target.textContent;
+      operationsHistory[operationsHistory.length - 1] = target.textContent;
+      history.textContent = operationsHistory.join(' ');
     } else {
-      secondOperand = formatToNumber(display.textContent);
-      if (secondOperand === 0 && operator === '÷') {
-        display.textContent = 'ERROR';
-        return;
+      currentOperator = target.textContent;
+      history.textContent = displayHistory(
+        operationsHistory,
+        displayedNumber,
+        currentOperator
+      );
+
+      const len = operationsHistory.length;
+      if (firstOperand === '') {
+        firstOperand = +formatToNumber(displayedNumber);
+      } else {
+        const previousOperator = operationsHistory[len - 3];
+        secondOperand = +formatToNumber(displayedNumber);
+        if (secondOperand === 0 && previousOperator === '÷') {
+          display.textContent = 'Error';
+          return;
+        }
+        display.textContent = operate(
+          previousOperator,
+          firstOperand,
+          secondOperand
+        );
+        firstOperand = +formatToNumber(display.textContent);
       }
-      display.textContent = operate(operator, firstOperand, secondOperand);
-      firstOperand = formatToNumber(display.textContent);
     }
-    operator = target.textContent;
     target.classList.add('active');
   }
 
   if (target.classList.contains('equal')) {
     secondOperand = formatToNumber(display.textContent);
-    if (secondOperand === 0 && operator === '÷') {
+    if (secondOperand === 0 && currentOperator === '÷') {
       display.textContent = 'ERROR';
       return;
     }
-    display.textContent = operate(operator, firstOperand, secondOperand);
-    firstOperand = secondOperand = operator = storedData = '';
+    display.textContent = operate(currentOperator, firstOperand, secondOperand);
+    firstOperand = secondOperand = currentOperator = storedData = '';
   }
 });
