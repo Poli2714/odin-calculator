@@ -9,8 +9,8 @@ const operatorBtns = document.querySelectorAll('.operator');
 let firstOperand = '';
 let secondOperand = '';
 let currentOperator = '';
-// let storedData = '';
 let operationsHistory = [];
+let results = [];
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -52,30 +52,54 @@ const displayHistory = function (history, displayedNumber, operator) {
   history.push(displayedNumber, operator);
   return history.join(' ');
 };
-const clearDisplay = function (display) {};
+
+const clearDisplay = function () {
+  operationsHistory = [];
+  results = [];
+  display.textContent = '0';
+  history.textContent = '';
+  firstOperand = secondOperand = currentOperator = '';
+  operatorBtns.forEach(operator => operator.classList.remove('active'));
+};
 
 calculator.addEventListener('click', function (e) {
   const target = e.target;
   if (!target.classList.contains('btn')) return;
 
   if (target.classList.contains('clear')) {
-    display.textContent = '0';
-    history.textContent = '';
-    clearBtn.textContent = 'AC';
-    firstOperand = secondOperand = currentOperator = storedData = '';
-    operatorBtns.forEach(operator => operator.classList.remove('active'));
+    if (target.textContent === 'AC' || operationsHistory.length <= 2)
+      clearDisplay();
+    else if (target.textContent === 'C') {
+      if (currentOperator) {
+        operationsHistory.splice(-3, 2);
+        results.splice(-1, 1);
+        history.textContent = operationsHistory.join(' ');
+        display.textContent =
+          operationsHistory.length > 2
+            ? results[results.length - 1]
+            : operationsHistory[operationsHistory.length - 2];
+        firstOperand = +formatToNumber(display.textContent);
+        secondOperand = '';
+      } else {
+        display.textContent = results[results.length - 1];
+        currentOperator = operationsHistory[operationsHistory.length - 1];
+        operatorBtns.forEach(operator => {
+          if (operator.textContent === currentOperator)
+            operator.classList.add('active');
+        });
+      }
+    }
+    target.textContent = 'AC';
   }
 
   if (target.classList.contains('plus-minus')) {
     const displayedNumber = Number(display.textContent);
-    storedData = !displayedNumber ? '-0' : 0 - displayedNumber;
-    display.textContent = storedData;
+    display.textContent = !displayedNumber ? '-0' : 0 - displayedNumber;
   }
 
   if (target.classList.contains('percent')) {
     const displayedNumber = Number(display.textContent);
     display.textContent = convertToPercent(displayedNumber);
-    storedData = '';
   }
 
   if (target.classList.contains('number')) {
@@ -103,7 +127,7 @@ calculator.addEventListener('click', function (e) {
     if (currentOperator) {
       operatorBtns.forEach(operator => operator.classList.remove('active'));
       currentOperator = target.textContent;
-      operationsHistory[operationsHistory.length - 1] = target.textContent;
+      operationsHistory.splice(-1, 1, currentOperator);
       history.textContent = operationsHistory.join(' ');
     } else {
       currentOperator = target.textContent;
@@ -121,6 +145,7 @@ calculator.addEventListener('click', function (e) {
         secondOperand = +formatToNumber(displayedNumber);
         if (secondOperand === 0 && previousOperator === '÷') {
           display.textContent = 'Error';
+          results.push(display.textContent);
           return;
         }
         display.textContent = operate(
@@ -128,6 +153,7 @@ calculator.addEventListener('click', function (e) {
           firstOperand,
           secondOperand
         );
+        results.push(display.textContent);
         firstOperand = +formatToNumber(display.textContent);
       }
     }
