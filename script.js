@@ -1,22 +1,20 @@
-'use strict';
-
 const calculator = document.querySelector('.calculator');
 const history = document.querySelector('.history');
 const display = document.querySelector('.result');
 const clearBtn = document.querySelector('.clear');
 const operatorBtns = document.querySelectorAll('.operator');
 
-let firstOperand = '';
-let secondOperand = '';
-let currentOperator = '';
-let operationsHistory = [];
-let results = [];
+const calc = {
+  history: [],
+  results: [],
+};
+let isEqualPressed = false;
+let isOperatorActive = false;
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
 const multiply = (a, b) => a * b;
 const divide = (a, b) => a / b;
-const convertToPercent = num => num / 100;
 const operate = function (operator, firstOperand, secondOperand) {
   const numberFormat = new Intl.NumberFormat('en-us');
   switch (operator) {
@@ -27,146 +25,164 @@ const operate = function (operator, firstOperand, secondOperand) {
     case 'x':
       return numberFormat.format(multiply(firstOperand, secondOperand));
     case '÷':
-      return numberFormat.format(divide(firstOperand, secondOperand));
+      return operator === '÷' && secondOperand === 0
+        ? 'ERROR'
+        : numberFormat.format(divide(firstOperand, secondOperand));
     default:
       return 'Please use a valid operator';
   }
 };
+
 const isFloat = n => Number(n) % 1 !== 0;
-const formatToNumber = function (string) {
-  return string
+
+const clearHistory = function () {
+  history.textContent = '';
+  calc.history = [];
+  calc.results = [];
+};
+
+const removeActiveOperator = function () {
+  operatorBtns.forEach(element => element.classList.remove('active'));
+};
+
+const clearDisplay = function () {
+  display.textContent = '0';
+};
+
+const reset = function (el) {
+  clearHistory(el);
+  removeActiveOperator();
+  clearDisplay(el);
+  isOperatorActive = false;
+  isEqualPressed = false;
+};
+
+const insertPlusMinus = function (displayedNumber) {
+  return displayedNumber === '0'
+    ? '-0'
+    : new Intl.NumberFormat('en-us').format(0 - displayedNumber);
+};
+
+const convertToPercent = function (displayedNumber) {
+  if (displayedNumber === '0') return '0';
+  if (displayedNumber === '-0') return '-0';
+  return `${Number(displayedNumber) / 100}`;
+};
+
+const chainNumbers = function (displayedNumber, pressedNumber) {
+  if (isOperatorActive) {
+    removeActiveOperator();
+    displayedNumber = '0';
+    isOperatorActive = false;
+  }
+  if (displayedNumber === '0' && pressedNumber === '0') return '0';
+  if (displayedNumber === '-0' && pressedNumber === '0') return '-0';
+  if (displayedNumber === '0') return pressedNumber;
+  if (displayedNumber === '-0') return `${0 - pressedNumber}`;
+  return `${displayedNumber}${pressedNumber}`;
+};
+
+const removeFormat = function (displayedNumber) {
+  if (displayedNumber.length < 5) return displayedNumber;
+  return displayedNumber
     .split('')
     .filter(char => char !== ',')
     .join('');
 };
 
-const renderNumbers = function (displayedNumber, pressedNumber) {
-  if (displayedNumber === '0' && pressedNumber === '0') return '0';
-  if (displayedNumber === '-0' && pressedNumber === '0') return '-0';
-  if (displayedNumber === '0') return pressedNumber;
-  if (displayedNumber === '-0') return `${0 - pressedNumber}`;
-  return new Intl.NumberFormat('en-us').format(displayedNumber + pressedNumber);
-};
-
-const displayHistory = function (history, displayedNumber, operator) {
-  history.push(displayedNumber, operator);
-  return history.join(' ');
-};
-
-const clearDisplay = function () {
-  operationsHistory = [];
-  results = [];
-  display.textContent = '0';
-  history.textContent = '';
-  firstOperand = secondOperand = currentOperator = '';
-  operatorBtns.forEach(operator => operator.classList.remove('active'));
-};
-
-calculator.addEventListener('click', function (e) {
+calculator.addEventListener('click', e => {
   const target = e.target;
+
   if (!target.classList.contains('btn')) return;
 
+  // WHEN PRESSED ON AC/C BUTTON
   if (target.classList.contains('clear')) {
-    if (target.textContent === 'AC' || operationsHistory.length <= 2)
-      clearDisplay();
-    else if (target.textContent === 'C') {
-      if (currentOperator) {
-        operationsHistory.splice(-3, 2);
-        results.splice(-1, 1);
-        history.textContent = operationsHistory.join(' ');
-        display.textContent =
-          operationsHistory.length > 2
-            ? results[results.length - 1]
-            : operationsHistory[operationsHistory.length - 2];
-        firstOperand = +formatToNumber(display.textContent);
-        secondOperand = '';
-      } else {
-        display.textContent = results[results.length - 1];
-        currentOperator = operationsHistory[operationsHistory.length - 1];
-        operatorBtns.forEach(operator => {
-          if (operator.textContent === currentOperator)
-            operator.classList.add('active');
-        });
-      }
-    }
-    target.textContent = 'AC';
+    reset();
   }
 
+  // WHEN PRESSED ON PLUS-MINUS BUTTON
   if (target.classList.contains('plus-minus')) {
-    const displayedNumber = Number(display.textContent);
-    display.textContent = !displayedNumber ? '-0' : 0 - displayedNumber;
+    const displayedNumber = removeFormat(display.textContent);
+    display.textContent = insertPlusMinus(displayedNumber);
   }
 
+  // WHEN PRESSED ON PERCENT BUTTON
   if (target.classList.contains('percent')) {
-    const displayedNumber = Number(display.textContent);
+    const displayedNumber = removeFormat(display.textContent);
     display.textContent = convertToPercent(displayedNumber);
   }
 
+  // WHEN PRESSED ON NUMBER BUTTONS
   if (target.classList.contains('number')) {
-    let userNumber = target.textContent;
-    let displayedNumber = formatToNumber(display.textContent);
-    if (currentOperator) {
-      operatorBtns.forEach(operator => operator.classList.remove('active'));
-      displayedNumber = '0';
-      currentOperator = '';
-    }
-    display.textContent = renderNumbers(displayedNumber, userNumber);
-    clearBtn.textContent = 'C';
+    if (isEqualPressed || display.textContent === 'ERROR') reset();
+
+    const pressedNumber = target.textContent;
+    let displayedNumber = removeFormat(display.textContent);
+    const result = chainNumbers(displayedNumber, pressedNumber);
+
+    display.textContent = new Intl.NumberFormat('en-us').format(result);
   }
 
+  // WHEN PRESSED ON PERIOD BUTTON
   if (target.classList.contains('period')) {
-    const displayNumber = display.textContent;
-    if (isFloat(displayNumber)) return;
-    storedData = displayNumber === '0' ? '0.' : `${storedData}.`;
-    display.textContent = storedData;
-    clearBtn.textContent = 'C';
+    if (isEqualPressed || display.textContent === 'ERROR') reset();
+    const displayedNumber = Number(removeFormat(display.textContent));
+    if (isFloat(displayedNumber)) return;
+    display.textContent = `${new Intl.NumberFormat('en-us').format(
+      displayedNumber
+    )}.`;
   }
 
+  // WHEN PRESSED ON OPERATOR BUTTONS
   if (target.classList.contains('operator')) {
-    let displayedNumber = display.textContent;
-    if (currentOperator) {
-      operatorBtns.forEach(operator => operator.classList.remove('active'));
-      currentOperator = target.textContent;
-      operationsHistory.splice(-1, 1, currentOperator);
-      history.textContent = operationsHistory.join(' ');
-    } else {
-      currentOperator = target.textContent;
-      history.textContent = displayHistory(
-        operationsHistory,
-        displayedNumber,
-        currentOperator
-      );
+    if (display.textContent === 'ERROR') reset();
 
-      const len = operationsHistory.length;
-      if (firstOperand === '') {
-        firstOperand = +formatToNumber(displayedNumber);
-      } else {
-        const previousOperator = operationsHistory[len - 3];
-        secondOperand = +formatToNumber(displayedNumber);
-        if (secondOperand === 0 && previousOperator === '÷') {
-          display.textContent = 'Error';
-          results.push(display.textContent);
-          return;
-        }
-        display.textContent = operate(
-          previousOperator,
-          firstOperand,
-          secondOperand
-        );
-        results.push(display.textContent);
-        firstOperand = +formatToNumber(display.textContent);
-      }
+    if (isOperatorActive) {
+      removeActiveOperator();
+      calc.history.splice(-1, 1, target.textContent);
+      history.textContent = calc.history.join(' ');
+      target.classList.add('active');
+      return;
     }
+
+    isOperatorActive = true;
+    const len = calc.history.length;
+    const pressedNumber = display.textContent;
+    if (len && !isEqualPressed) {
+      const operator = calc.history[len - 1];
+      const firstOperand =
+        len === 2
+          ? Number(removeFormat(calc.history[0]))
+          : calc.results[calc.results.length - 1];
+      const secondOperand = Number(removeFormat(pressedNumber));
+
+      display.textContent = operate(operator, firstOperand, secondOperand);
+      calc.results.push(Number(removeFormat(display.textContent)));
+    } else isEqualPressed = false;
+
+    len % 2
+      ? calc.history.push(target.textContent)
+      : calc.history.push(pressedNumber, target.textContent);
+    history.textContent = calc.history.join(' ');
     target.classList.add('active');
   }
 
+  // WHEN PRESSED ON EQUAL BUTTON
   if (target.classList.contains('equal')) {
-    secondOperand = formatToNumber(display.textContent);
-    if (secondOperand === 0 && currentOperator === '÷') {
-      display.textContent = 'ERROR';
-      return;
-    }
+    if (isOperatorActive) reset();
+    if (calc.history.length < 2) return;
+
+    isEqualPressed = true;
+    calc.history.push(display.textContent);
+    history.textContent = calc.history.join(' ');
+    const len = calc.history.length;
+    const currentOperator = calc.history[len - 2];
+    const firstOperand =
+      len === 3
+        ? Number(removeFormat(calc.history[0]))
+        : calc.results[calc.results.length - 1];
+    const secondOperand = Number(removeFormat(display.textContent));
     display.textContent = operate(currentOperator, firstOperand, secondOperand);
-    firstOperand = secondOperand = currentOperator = storedData = '';
+    calc.results.push(Number(removeFormat(display.textContent)));
   }
 });
