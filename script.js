@@ -10,6 +10,7 @@ const calc = {
 };
 let isEqualPressed = false;
 let isOperatorActive = false;
+let secondOperandOnHold;
 
 const add = (a, b) => a + b;
 const subtract = (a, b) => a - b;
@@ -170,19 +171,27 @@ calculator.addEventListener('click', e => {
   // WHEN PRESSED ON EQUAL BUTTON
   if (target.classList.contains('equal')) {
     if (isOperatorActive) reset();
-    if (calc.history.length < 2) return;
+    if (!calc.history.length) return;
 
-    isEqualPressed = true;
-    calc.history.push(display.textContent);
-    history.textContent = calc.history.join(' ');
     const len = calc.history.length;
-    const currentOperator = calc.history[len - 2];
-    const firstOperand =
-      len === 3
-        ? Number(removeFormat(calc.history[0]))
-        : calc.results[calc.results.length - 1];
-    const secondOperand = Number(removeFormat(display.textContent));
-    display.textContent = operate(currentOperator, firstOperand, secondOperand);
+    const operator = calc.history[isEqualPressed ? len - 2 : len - 1];
+    const firstOperand = isEqualPressed
+      ? Number(removeFormat(display.textContent))
+      : len === 2
+      ? Number(removeFormat(calc.history[0]))
+      : calc.results[calc.results.length - 1];
+    const secondOperand = isEqualPressed
+      ? Number(removeFormat(calc.history[len - 1]))
+      : Number(removeFormat(display.textContent));
+    if (!isEqualPressed) secondOperandOnHold = display.textContent;
+
+    display.textContent = operate(operator, firstOperand, secondOperand);
     calc.results.push(Number(removeFormat(display.textContent)));
+
+    isEqualPressed
+      ? calc.history.push(operator, secondOperandOnHold)
+      : calc.history.push(secondOperandOnHold);
+    history.textContent = calc.history.join(' ');
+    isEqualPressed = true;
   }
 });
